@@ -16,13 +16,14 @@ public class ClientThread extends Thread {
     private String address;
     private int port;
     private String pokemon;
-
+    private String action;
     private Socket socket;
 
-    public ClientThread(String address, int port, String pokemon) {
+    public ClientThread(String address, int port, String pokemon, String action) {
         this.address = address;
         this.port = port;
         this.pokemon = pokemon;
+        this.action = action;
     }
 
     @Override
@@ -39,32 +40,44 @@ public class ClientThread extends Thread {
                 Log.e("ClientThread", "[CLIENT THREAD] Buffered Reader / Print Writer are null!");
                 return;
             }
+            printWriter.println(action);
+            printWriter.flush();
+
             printWriter.println(pokemon);
             printWriter.flush();
 
             String pokeInfo;
             while ((pokeInfo = bufferedReader.readLine()) != null) {
 
-                String abil = pokeInfo.split(";")[0];
-                String url = pokeInfo.split(";")[1];
+                if (action.contains("poke")) {
+                    String abil = pokeInfo.split(";")[0];
+                    String url = pokeInfo.split(";")[1];
 
-                final String finalizedWeateherInformation = abil;
-                PracticalTest02MainActivity.pokemon_ab.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        PracticalTest02MainActivity.pokemon_ab.setText(finalizedWeateherInformation);
-                    }
-                });
+                    final String finalizedWeateherInformation = abil;
+                    PracticalTest02MainActivity.pokemon_ab.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            PracticalTest02MainActivity.pokemon_ab.setText(finalizedWeateherInformation);
+                        }
+                    });
 
-                URL urlReal = new URL(url);
-                final Bitmap bmp = BitmapFactory.decodeStream(urlReal.openConnection().getInputStream());
-                PracticalTest02MainActivity.pokemon_url.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        PracticalTest02MainActivity.pokemon_url.setImageBitmap(bmp);
-                    }
-                });
-
+                    URL urlReal = new URL(url);
+                    final Bitmap bmp = BitmapFactory.decodeStream(urlReal.openConnection().getInputStream());
+                    PracticalTest02MainActivity.pokemon_url.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            PracticalTest02MainActivity.pokemon_url.setImageBitmap(bmp);
+                        }
+                    });
+                } else {
+                    final String finalizedWeateherInformation = pokeInfo;
+                    PracticalTest02MainActivity.pokemon_ab.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            PracticalTest02MainActivity.pokemon_ab.setText(finalizedWeateherInformation);
+                        }
+                    });
+                }
             }
         } catch (Exception ex) {
             Log.e("ClientThread", "[CLIENT THREAD] An exception has occurred: " + ex.getMessage());

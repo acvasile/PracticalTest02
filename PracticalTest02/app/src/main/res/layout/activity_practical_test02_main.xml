@@ -65,6 +65,12 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:text="Get Pokemon"/>
+    <Button
+        android:id="@+id/pokemon_go20"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="Get 20 Pokemons"/>
     <Space
         android:layout_width="wrap_content"
         android:layout_height="20dp" />

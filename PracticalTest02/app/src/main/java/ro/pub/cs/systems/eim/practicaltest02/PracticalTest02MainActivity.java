@@ -18,6 +18,7 @@ public class PracticalTest02MainActivity extends AppCompatActivity {
     public static ImageView pokemon_url;
     public static Button connect_button;
     public static Button pokemon_go;
+    public static Button pokemon_go20;
 
     public static ServerThread serverThread;
     public static ClientThread clientThread;
@@ -64,11 +65,33 @@ public class PracticalTest02MainActivity extends AppCompatActivity {
                 return;
             }
 
-            clientThread = new ClientThread(clientAddress, Integer.parseInt(clientPort), pokeName);
+            clientThread = new ClientThread(clientAddress, Integer.parseInt(clientPort), pokeName, "poke");
             clientThread.start();
         }
     }
 
+    private PokeGo20 pokeGo20 = new PokeGo20();
+    private class PokeGo20 implements Button.OnClickListener {
+
+        @Override
+        public void onClick(View view) {
+            String clientAddress = "127.0.0.1";
+            String clientPort = server_port_edit_text.getText().toString();
+            if (clientAddress == null || clientAddress.isEmpty()
+                    || clientPort == null || clientPort.isEmpty()) {
+                Toast.makeText(getApplicationContext(), "[MAIN ACTIVITY] Client connection parameters should be filled!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (serverThread == null || !serverThread.isAlive()) {
+                Toast.makeText(getApplicationContext(), "[MAIN ACTIVITY] There is no server to connect to!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            Toast.makeText(getApplicationContext(), "Get 20 Pokes", Toast.LENGTH_SHORT).show();
+
+            clientThread = new ClientThread(clientAddress, Integer.parseInt(clientPort), "", "");
+            clientThread.start();
+        }
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -81,8 +104,10 @@ public class PracticalTest02MainActivity extends AppCompatActivity {
         pokemon_url = findViewById(R.id.pokemon_url);
         connect_button = findViewById(R.id.connect_button);
         pokemon_go = findViewById(R.id.pokemon_go);
+        pokemon_go20 = findViewById(R.id.pokemon_go20);
 
         connect_button.setOnClickListener(connectButtonClickListener);
         pokemon_go.setOnClickListener(pokeGo);
+        pokemon_go20.setOnClickListener(pokeGo20);
     }
 }

@@ -59,6 +59,26 @@ public class CommunicationThread extends Thread {
             is.close();
         }
     }
+
+    public String get20Poke() {
+        String pokes = "";
+
+        try
+        {
+            for (int i = 1; i <= 20; i++) {
+                Log.i("20poke", "Query for Pokemon"  + i);
+                String httpLink = "https://www.pokeapi.co/api/v2/pokemon/" + i;
+                JSONObject json = readJsonFromUrl(httpLink);
+                pokes += json.getJSONObject("species").getString("name") + ", ";
+            }
+            pokes = pokes.substring(0, pokes.length() - 2);
+            pokes += "!";
+
+        } catch (Exception ex) {}
+
+        return pokes;
+    }
+
     @Override
     public void run() {
         if (socket == null) {
@@ -74,35 +94,33 @@ public class CommunicationThread extends Thread {
             }
             Log.i("CommunicationThread", "[COMMUNICATION THREAD] Waiting for parameters from client (city / information type!");
 
-            String pokemon = bufferedReader.readLine();
-            if (pokemon == null || pokemon.isEmpty()) {
-                Log.e("CommunicationThread", "[COMMUNICATION THREAD] Error receiving parameters from client (city / information type!");
-                return;
+            String action = bufferedReader.readLine();
+            if (action.contains("poke")) {
+                String pokemon = bufferedReader.readLine();
+                if (pokemon == null || pokemon.isEmpty()) {
+                    Log.e("CommunicationThread", "[COMMUNICATION THREAD] Error receiving parameters from client (city / information type!");
+                    return;
+                }
+
+                Log.i("CommunicationThread", "[COMMUNICATION THREAD] Getting the information from the webservice...");
+                String httpLink = "https://www.pokeapi.co/api/v2/pokemon/" + pokemon;
+
+                JSONObject json = readJsonFromUrl(httpLink);
+                String abil = "";
+                JSONArray arr = json.getJSONArray("abilities");
+                for (int i = 0; i < arr.length(); i++) {
+                    JSONObject obj = arr.getJSONObject(i);
+                    abil += obj.getJSONObject("ability").getString("name")+ ", ";
+                }
+                String url = json.getJSONObject("sprites").getString("front_default");
+
+                printWriter.println(abil + ";" + url);
+                printWriter.flush();
+
+            } else {
+                printWriter.println(get20Poke());
+                printWriter.flush();
             }
-
-            Log.i("CommunicationThread", "[COMMUNICATION THREAD] Getting the information from the webservice...");
-//            HttpClient httpClient = new DefaultHttpClient();
-            String httpLink = "https://www.pokeapi.co/api/v2/pokemon/" + pokemon;
-//            HttpPost httpPost = new HttpPost(httpLink);
-//
-//            ResponseHandler<String> responseHandler = new BasicResponseHandler();
-//            String pageSourceCode = httpClient.execute(httpPost, responseHandler);
-//            if (pageSourceCode == null) {
-//                Log.e("CommunicationThread", "[COMMUNICATION THREAD] Error getting the information from the webservice!");
-//                return;
-//            }
-
-            JSONObject json = readJsonFromUrl(httpLink);
-            String abil = "";
-            JSONArray arr = json.getJSONArray("abilities");
-            for (int i = 0; i < arr.length(); i++) {
-                JSONObject obj = arr.getJSONObject(i);
-                abil += obj.getJSONObject("ability").getString("name")+ ", ";
-            }
-            String url = json.getJSONObject("sprites").getString("front_default");
-
-            printWriter.println(abil + ";" + url);
-            printWriter.flush();
 
         } catch (Exception ex) {
             Log.e("COMMUNICATION", "[COMMUNICATION THREAD] An exception has occurred: " + ex.getMessage());
